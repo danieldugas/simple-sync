@@ -50,7 +50,7 @@ for diff in missing_in_source:
     print("  ", diff)
 
 print("")
-print("Files in both, with non-matching timestamps:     (action: give-modified, take-modified)")
+print("Files in both, with non-matching timestamps:     (action: give-modified, take-modified, latest-modified)")
 both_modified = sorted(list((set(target_names).intersection(set(source_names)))))
 for diff in both_modified:
     source_time = source_times[source_names.index(diff)]
@@ -105,3 +105,19 @@ if keys == 'take-modified':
         command = "rsync \""+TARGET+"/"+diff+"\" \""+source_dir+"\" -tvr"
         print(command)
         os.system(command)
+
+if keys == 'latest-modified':
+    for diff in both_modified:
+        source_time = source_times[source_names.index(diff)]
+        target_time = target_times[target_names.index(diff)]
+        if int(source_time) != int(target_time):
+            if source_time < target_time:
+                source_dir = SOURCE+"/"+diff.rsplit("/",1)[0]+"/"
+                if not os.path.exists(source_dir): os.makedirs(source_dir)
+                command = "rsync \""+TARGET+"/"+diff+"\" \""+source_dir+"\" -tvr"
+            else:
+                target_dir = TARGET+"/"+diff.rsplit("/",1)[0]+"/"
+                if not os.path.exists(target_dir): os.makedirs(target_dir)
+                command = "rsync \""+SOURCE+"/"+diff+"\" \""+target_dir+"\" -tvr"
+            print(command)
+            os.system(command)

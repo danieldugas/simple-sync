@@ -38,20 +38,21 @@ target_names = [data[1] for data in target]
 target_times = [float(data[0]) for data in target]
 
 
-print("Files in source, missing in target:")
+print("Files in source, missing in target:       (actions: give, PURGE)")
 missing_in_target = sorted(list((set(source_names).difference(set(target_names)))))
 for diff in missing_in_target:
     print("  ", diff)
 
 print("")
-print("Files in target, missing in source:")
+print("Files in target, missing in source:       (actions: take, FORSAKE)")
 missing_in_source = sorted(list((set(target_names).difference(set(source_names)))))
 for diff in missing_in_source:
     print("  ", diff)
 
 print("")
-print("Files in both, with non-matching timestamps:")
-for diff in sorted(list((set(target_names).intersection(set(source_names))))):
+print("Files in both, with non-matching timestamps:     (action: give-modified, take-modified)")
+both_modified = sorted(list((set(target_names).intersection(set(source_names)))))
+for diff in both_modified:
     source_time = source_times[source_names.index(diff)]
     target_time = target_times[target_names.index(diff)]
     if int(source_time) != int(target_time):
@@ -65,20 +66,42 @@ for diff in sorted(list((set(target_names).intersection(set(source_names))))):
 
 print("")
 keys = raw_input("Action:\n>>")
-if keys == 'sync':
+if keys == 'give':
     for diff in missing_in_target:
-        target_path = TARGET+"/"+diff.rsplit("/",1)[0]+"/"
-        if not os.path.exists(target_path): os.makedirs(target_path)
-        command = "rsync \""+SOURCE+"/"+diff+"\" \""+target_path+"\" -tvr"
-        print(command)
-        os.system(command)
-if keys == 'dry-run':
-    for diff in missing_in_target:
-        if not os.path.exists(TARGET+"/"+diff): os.makedirs(TARGET+"/"+diff)
-        command = "rsync \""+SOURCE+"/"+diff+"\" \""+TARGET+"/"+diff+"\" -tvrn"
+        target_dir = TARGET+"/"+diff.rsplit("/",1)[0]+"/"
+        if not os.path.exists(target_dir): os.makedirs(target_dir)
+        command = "rsync \""+SOURCE+"/"+diff+"\" \""+target_dir+"\" -tvr"
         print(command)
         os.system(command)
 
-if keys == 'delete':
+if keys == 'FORSAKE':
     for diff in missing_in_source:
         os.system("rm \""+TARGET+"/"+diff+"\"")
+
+if keys == 'PURGE':
+    for diff in missing_in_target:
+        os.system("rm \""+SOURCE+"/"+diff+"\"")
+
+if keys == 'take':
+    for diff in missing_in_source:
+        source_dir = SOURCE+"/"+diff.rsplit("/",1)[0]+"/"
+        if not os.path.exists(source_dir): os.makedirs(source_dir)
+        command = "rsync \""+TARGET+"/"+diff+"\" \""+source_dir+"\" -tvr"
+        print(command)
+        os.system(command)
+
+if keys == 'give-modified':
+    for diff in both_modified:
+        target_dir = TARGET+"/"+diff.rsplit("/",1)[0]+"/"
+        if not os.path.exists(target_dir): os.makedirs(target_dir)
+        command = "rsync \""+SOURCE+"/"+diff+"\" \""+target_dir+"\" -tvr"
+        print(command)
+        os.system(command)
+
+if keys == 'take-modified':
+    for diff in both_modified:
+        source_dir = SOURCE+"/"+diff.rsplit("/",1)[0]+"/"
+        if not os.path.exists(source_dir): os.makedirs(source_dir)
+        command = "rsync \""+TARGET+"/"+diff+"\" \""+source_dir+"\" -tvr"
+        print(command)
+        os.system(command)

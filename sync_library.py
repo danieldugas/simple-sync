@@ -18,14 +18,19 @@ source_index = "/tmp/source_index.txt"
 target_index = "/tmp/target_index.txt"
 
 if INCLUDE_CHECKSUM:
-    os.system("find " + SOURCE + " -type f -printf '%T@ ' -exec shasum {} \; > " + source_index)
+    retvalue = os.system("find " + SOURCE + " -type f -printf '%T@ ' -exec shasum {} \; > " + source_index)
 else:
-    os.system("find " + SOURCE + " -type f -printf '%T@ %P\n' > " + source_index)
+    retvalue = os.system("find " + SOURCE + " -type f -printf '%T@ %P\n' > " + source_index)
+if retvalue != 0:
+    raise SystemError
 
 if INCLUDE_CHECKSUM:
-    os.system("find " + TARGET + " -type f -printf '%T@ ' -exec shasum {} \; > " + target_index)
+    retvalue = os.system("find " + TARGET + " -type f -printf '%T@ ' -exec shasum {} \; > " + target_index)
 else:
-    os.system("find " + TARGET + " -type f -printf '%T@ %P\n' > " + target_index)
+    retvalue = os.system("find " + TARGET + " -type f -printf '%T@ %P\n' > " + target_index)
+if retvalue != 0:
+    raise SystemError
+
 
 def read_index(filepath):
     return [line.strip().split(' ', 1) for line in open(filepath, 'rb')]

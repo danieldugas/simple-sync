@@ -1,4 +1,5 @@
 from __future__ import print_function
+from datetime import datetime
 import sys
 import os 
 
@@ -53,9 +54,9 @@ print("")
 print("Files in both, with non-matching timestamps:     (action: give-modified, take-modified, latest-modified)")
 both_modified = sorted(list((set(target_names).intersection(set(source_names)))))
 for diff in both_modified:
-    source_time = source_times[source_names.index(diff)]
-    target_time = target_times[target_names.index(diff)]
-    if int(source_time) != int(target_time):
+    source_time = datetime.fromtimestamp( source_times[source_names.index(diff)] )
+    target_time = datetime.fromtimestamp( target_times[target_names.index(diff)] )
+    if source_time.replace(second=0, microsecond=0) != target_time.replace(second=0, microsecond=0):
         print("  ", source_time, end='')
         if source_time < target_time:
             print(" < ", end='')
@@ -121,3 +122,8 @@ if keys == 'latest-modified':
                 command = "rsync \""+SOURCE+"/"+diff+"\" \""+target_dir+"\" -tvr"
             print(command)
             os.system(command)
+
+if keys == '':
+    print("No action taken.")
+
+print("Exiting.")

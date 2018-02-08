@@ -8,7 +8,7 @@ TIMESTAMP_WINDOW_S = 1
 
 argv = sys.argv
 if len(argv) != 3:
-    print("Usage: sync_library.py LIBRARY_PATH TARGET_PATH")
+    print("Usage: sync_library.py LOCAL_PATH REMOTE_PATH")
     raise NotImplementedError
 
 SOURCE = argv[1]

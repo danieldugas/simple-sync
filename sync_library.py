@@ -6,13 +6,23 @@ import os
 INCLUDE_CHECKSUM = False
 TIMESTAMP_WINDOW_S = 1
 
+def trailing_slash(path):
+    try:
+        path[-1]
+    except IndexError:
+        return ''
+    return path+ ('' if path[-1] == '/' else '/')
+
+def parent_dir(path):
+    return trailing_slash("/".join(path.split("/")[:-1]))
+
 argv = sys.argv
 if len(argv) != 3:
     print("Usage: sync_library.py LOCAL_PATH REMOTE_PATH")
     raise NotImplementedError
 
-SOURCE = argv[1]
-TARGET = argv[2]
+SOURCE = trailing_slash(argv[1])
+TARGET = trailing_slash(argv[2])
 
 source_index = "/tmp/source_index.txt"
 target_index = "/tmp/target_index.txt"
@@ -74,41 +84,41 @@ print("")
 keys = raw_input("Action:\n>>")
 if keys == 'give':
     for diff in missing_in_target:
-        target_dir = TARGET+"/"+diff.rsplit("/",1)[0]+"/"
+        target_dir = TARGET+ parent_dir(diff)
         if not os.path.exists(target_dir): os.makedirs(target_dir)
-        command = "rsync \""+SOURCE+"/"+diff+"\" \""+target_dir+"\" -tvr"
+        command = "rsync \""+SOURCE+diff+"\" \""+target_dir+"\" -tvr"
         print(command)
         os.system(command)
 
 if keys == 'FORSAKE':
     for diff in missing_in_source:
-        os.system("rm \""+TARGET+"/"+diff+"\"")
+        os.system("rm \""+TARGET+diff+"\"")
 
 if keys == 'PURGE':
     for diff in missing_in_target:
-        os.system("rm \""+SOURCE+"/"+diff+"\"")
+        os.system("rm \""+SOURCE+diff+"\"")
 
 if keys == 'take':
     for diff in missing_in_source:
-        source_dir = SOURCE+"/"+diff.rsplit("/",1)[0]+"/"
+        source_dir = SOURCE+ parent_dir(diff)
         if not os.path.exists(source_dir): os.makedirs(source_dir)
-        command = "rsync \""+TARGET+"/"+diff+"\" \""+source_dir+"\" -tvr"
+        command = "rsync \""+TARGET+diff+"\" \""+source_dir+"\" -tvr"
         print(command)
         os.system(command)
 
 if keys == 'give-modified':
     for diff in both_modified:
-        target_dir = TARGET+"/"+diff.rsplit("/",1)[0]+"/"
+        target_dir = TARGET+ parent_dir(diff)
         if not os.path.exists(target_dir): os.makedirs(target_dir)
-        command = "rsync \""+SOURCE+"/"+diff+"\" \""+target_dir+"\" -tvr"
+        command = "rsync \""+SOURCE+diff+"\" \""+target_dir+"\" -tvr"
         print(command)
         os.system(command)
 
 if keys == 'take-modified':
     for diff in both_modified:
-        source_dir = SOURCE+"/"+diff.rsplit("/",1)[0]+"/"
+        source_dir = SOURCE+ parent_dir(diff)
         if not os.path.exists(source_dir): os.makedirs(source_dir)
-        command = "rsync \""+TARGET+"/"+diff+"\" \""+source_dir+"\" -tvr"
+        command = "rsync \""+TARGET+diff+"\" \""+source_dir+"\" -tvr"
         print(command)
         os.system(command)
 
@@ -118,13 +128,13 @@ if keys == 'latest-modified':
         target_time = target_times[target_names.index(diff)]
         if int(source_time) != int(target_time):
             if source_time < target_time:
-                source_dir = SOURCE+"/"+diff.rsplit("/",1)[0]+"/"
+                source_dir = SOURCE+ parent_dir(diff)
                 if not os.path.exists(source_dir): os.makedirs(source_dir)
-                command = "rsync \""+TARGET+"/"+diff+"\" \""+source_dir+"\" -tvr"
+                command = "rsync \""+TARGET+diff+"\" \""+source_dir+"\" -tvr"
             else:
-                target_dir = TARGET+"/"+diff.rsplit("/",1)[0]+"/"
+                target_dir = TARGET+ parent_dir(diff)
                 if not os.path.exists(target_dir): os.makedirs(target_dir)
-                command = "rsync \""+SOURCE+"/"+diff+"\" \""+target_dir+"\" -tvr"
+                command = "rsync \""+SOURCE+diff+"\" \""+target_dir+"\" -tvr"
             print(command)
             os.system(command)
 

@@ -1,12 +1,15 @@
+#!/usr/bin/env python
 from __future__ import print_function
 from datetime import datetime
 import sys
 import os 
+import argparse
 
 INCLUDE_CHECKSUM = False
 TIMESTAMP_WINDOW_S = 1
 
 def trailing_slash(path):
+    """ Add a trailing slash at the end of a path if it is missing. """
     try:
         path[-1]
     except IndexError:
@@ -16,13 +19,15 @@ def trailing_slash(path):
 def parent_dir(path):
     return trailing_slash("/".join(path.split("/")[:-1]))
 
-argv = sys.argv
-if len(argv) != 3:
-    print("Usage: sync_library.py LOCAL_PATH REMOTE_PATH")
-    raise NotImplementedError
+parser = argparse.ArgumentParser(description='Compares changes between two directories.')
+parser.add_argument('source_dir', metavar='SOURCE_DIR', type=str,
+                    help='The source directory (ours)')
+parser.add_argument('target_dir', metavar='TARGET_DIR', type=str,
+                    help='The target directory (theirs)')
+args = parser.parse_args()
 
-SOURCE = trailing_slash(argv[1])
-TARGET = trailing_slash(argv[2])
+SOURCE = trailing_slash(args.source_dir)
+TARGET = trailing_slash(args.target_dir)
 
 source_index = "/tmp/source_index.txt"
 target_index = "/tmp/target_index.txt"

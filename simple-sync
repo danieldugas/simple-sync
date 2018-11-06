@@ -33,16 +33,22 @@ source_index = "/tmp/source_index.txt"
 target_index = "/tmp/target_index.txt"
 
 if INCLUDE_CHECKSUM:
-    retvalue = os.system("find " + SOURCE + " -type f -printf '%T@ ' -exec shasum {} \; > " + source_index)
+    command = "find \"" + SOURCE + "\" -type f -printf '%T@ ' -exec shasum {} \; > " + source_index
+    print(command)
 else:
-    retvalue = os.system("find " + SOURCE + " -type f -printf '%T@ %P\n' > " + source_index)
+    command = "find \"" + SOURCE + "\" -type f -printf '%T@ %P\n' > " + source_index
+    print(command)
+retvalue = os.system(command)
 if retvalue != 0:
     raise SystemError
 
 if INCLUDE_CHECKSUM:
-    retvalue = os.system("find " + TARGET + " -type f -printf '%T@ ' -exec shasum {} \; > " + target_index)
+    command = "find \"" + TARGET + "\" -type f -printf '%T@ ' -exec shasum {} \; > " + target_index
+    print(command)
 else:
-    retvalue = os.system("find " + TARGET + " -type f -printf '%T@ %P\n' > " + target_index)
+    command = "find \"" + TARGET + "\" -type f -printf '%T@ %P\n' > " + target_index
+    print(command)
+retvalue = os.system(command)
 if retvalue != 0:
     raise SystemError
 
@@ -114,7 +120,7 @@ if keys == 'take':
 if keys == 'give-modified':
     for diff in both_modified:
         target_dir = TARGET+ parent_dir(diff)
-        if not os.path.exists(target_dir): os.makedirs(target_dir)
+#         if not os.path.exists(target_dir): os.makedirs(target_dir)
         command = "rsync \""+SOURCE+diff+"\" \""+target_dir+"\" -tvr"
         print(command)
         os.system(command)
